@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APEX SPORT — Tienda Deportiva</title>
+
+  <!-- Auth0 SDK -->
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Hoja de estilos externa -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════ NAV ═══════════════════════════ -->
+<nav>
+  <div class="logo">APEX<span>.</span>SPORT</div>
+  <div class="nav-right">
+    <div id="auth-section">
+      <button class="btn btn-outline" id="login-btn">Iniciar Sesión</button>
+    </div>
+    <button class="btn btn-outline" id="cart-btn" onclick="toggleCart()">
+      🛒 Carrito
+      <span id="cart-count" style="display:none">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════ HERO ══════════════════════════ -->
+<section id="hero">
+  <h1>Tu <em>rendimiento</em>,<br>nuestra pasión</h1>
+  <p>Equipamiento premium para atletas que no se conforman con menos.</p>
+  <div id="welcome-msg"></div>
+</section>
+
+<!-- ═══════════════════════════════ PRODUCTOS ═════════════════════ -->
+<main>
+
+  <!-- CAMISETAS -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Camisetas Deportivas</h2>
+      <span>3 productos</span>
+    </div>
+    <div class="grid" id="grid-camisetas"></div>
+  </div>
+
+  <!-- PANTALONES -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Pantalones Deportivos</h2>
+      <span>3 productos</span>
+    </div>
+    <div class="grid" id="grid-pantalones"></div>
+  </div>
+
+  <!-- ACCESORIOS -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Accesorios de Deporte</h2>
+      <span>3 productos</span>
+    </div>
+    <div class="grid" id="grid-accesorios"></div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════ FOOTER ════════════════════════ -->
+<footer>
+  <strong>APEX.SPORT</strong> — Todos los derechos reservados © 2025
+</footer>
+
+<!-- ═══════════════════════════════ CART SIDEBAR ══════════════════ -->
+<div id="cart-overlay" onclick="toggleCart()"></div>
+<div id="cart-sidebar">
+  <div class="cart-header">
+    <h3>Tu Carrito</h3>
+    <button class="close-btn" onclick="toggleCart()">✕</button>
+  </div>
+  <div id="cart-items"></div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span>Total</span>
+      <strong id="cart-total-price">$0</strong>
+    </div>
+    <button class="btn btn-accent" id="checkout-btn" onclick="openCheckout()">
+      Pagar Ahora →
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ AUTH OVERLAY ══════════════════ -->
+<div id="auth-overlay">
+  <div id="auth-card">
+    <h2>Bienvenido a<br>APEX.SPORT</h2>
+    <p>Inicia sesión para guardar tu carrito y realizar compras</p>
+    <button class="btn btn-accent auth-btn-big" onclick="doLogin()">
+      🔐 Iniciar Sesión con Auth0
+    </button>
+    <button class="btn btn-outline auth-btn-big"
+      onclick="document.getElementById('auth-overlay').classList.remove('show')">
+      Continuar sin cuenta
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ CHECKOUT MODAL ════════════════ -->
+<div class="modal-overlay" id="checkout-modal">
+  <div class="modal">
+    <h2>Datos de Envío</h2>
+    <p class="sub">Completa el formulario para finalizar tu compra</p>
+    <form id="checkout-form" onsubmit="submitOrder(event)">
+      <div class="form-group">
+        <label>Nombre completo *</label>
+        <input type="text" id="f-nombre" placeholder="Juan Pérez" />
+        <span class="form-error" id="err-nombre">Ingresa tu nombre completo.</span>
+      </div>
+      <div class="form-group">
+        <label>Dirección de envío *</label>
+        <input type="text" id="f-direccion" placeholder="Av. Siempre Viva 742" />
+        <span class="form-error" id="err-direccion">Ingresa una dirección válida.</span>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Correo electrónico *</label>
+          <input type="email" id="f-email" placeholder="juan@gmail.com" />
+          <span class="form-error" id="err-email">Ingresa un correo válido (e.g. @gmail.com).</span>
+        </div>
+        <div class="form-group">
+          <label>Teléfono *</label>
+          <input type="tel" id="f-telefono" placeholder="912345678" maxlength="12" />
+          <span class="form-error" id="err-telefono">Solo dígitos, entre 8 y 12 números.</span>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" onclick="closeCheckout()">Cancelar</button>
+        <button type="submit" class="btn btn-accent" id="pay-btn">Confirmar Pedido →</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ CONFIRM MODAL ═════════════════ -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal confirm-modal-inner">
+    <div class="confirm-icon">🎉</div>
+    <div class="confirm-title">¡Gracias por tu compra!</div>
+    <p class="confirm-sub">Tu pedido ha sido recibido y pronto estará en camino.</p>
+    <div class="order-summary" id="order-summary"></div>
+    <button class="btn btn-accent btn-full" onclick="closeConfirm()">Volver a la tienda</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ TOAST ════════════════════════ -->
+<div id="toast"></div>
+
+<!-- Script principal externo -->
+<script src="app.js"></script>
+</body>
+</html>
